@@ -1,0 +1,11 @@
+{
+	"id": "semantic-search",
+	"name": "Semantic Search",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "Search interface for semantic search.",
+	"author": "Joseph Platta",
+	"authorUrl": "",
+	"fundingUrl": "",
+	"isDesktopOnly": false
+}
