@@ -1,7 +1,7 @@
 #!/bin/bash
 
 OBSIDIAN_DEV_PLUGINS_PATH='/Users/jplatta/Library/Mobile Documents/iCloud~md~obsidian/Documents/development_vault/.obsidian/plugins'
-MY_PLUGINS_PATH='/Users/jplatta/repos/second_brain/my_obsidian_plugins/semantic_search'
+MY_PLUGINS_PATH='/Users/jplatta/repos/second_brain/obsidian_semantic_search/plugin'
 LINK_NAME="$OBSIDIAN_DEV_PLUGINS_PATH/semantic_search"
 
 echo "Creating symbolic link for the semantic_search plugin in the Obsidian development plugins directory..."
