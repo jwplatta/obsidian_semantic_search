@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 import { pipeline } from '@xenova/transformers';
 import * as sqlite_vss from "sqlite-vss";
-import * as tf from '@tensorflow/tfjs-node';
+import * as tf from '@tensorflow/tfjs';
 
 
 async function getEmbedder() {
@@ -53,15 +53,17 @@ async function getEmbedder() {
   ];
 
   const embedder = await getEmbedder();
+  let meanTensor;
 
   for (const msgText of messages) {
     console.log(msgText);
     const embeddings = await embedder([msgText]);
-    const meanTensor = tf.tensor(embeddings[0]['data']).reshape(embeddings[0]['dims']).mean(0);
+    meanTensor = tf.tensor(embeddings[0]['data']).reshape(embeddings[0]['dims']).mean(0);
     const stmt = db.prepare('INSERT INTO text_chunks (text_chunk, embedding) VALUES (?, ?)')
     const embeddingJSON = JSON.stringify(meanTensor.arraySync());
     stmt.run(msgText, embeddingJSON);
   }
+  console.log(meanTensor);
 
   const insertEmbeddingsIntoVSS = `
     INSERT INTO vss_text_chunks(rowid, embedding)
@@ -75,6 +77,8 @@ async function getEmbedder() {
     console.error(insertEmbeddingsIntoVSS, error);
   }
 
+  console.log("[" + meanTensor.arraySync().toString() + "]")
+
   const neighborsCount = 20;
   const searchEmbeddings = `
     WITH matches AS (
@@ -84,9 +88,9 @@ async function getEmbedder() {
       FROM vss_text_chunks
       WHERE vss_search(
         embedding,
-        (select embedding from text_chunks where rowid = 1)
+        ?
       )
-      limit ${neighborsCount}
+      limit ?
     )
     SELECT
       text_chunks.rowid,
@@ -95,8 +99,10 @@ async function getEmbedder() {
     FROM matches
     LEFT JOIN text_chunks on text_chunks.rowid = matches.rowid;
   `;
-
-  const searchResults = db.prepare(searchEmbeddings).all();
+  const searchResults = db.prepare(searchEmbeddings).all(
+    "[" + meanTensor.arraySync().toString() + "]",
+    neighborsCount
+  );
   console.log(searchResults);
 
     // insert into vss_articles(rowid, headline_embedding, description_embedding)
