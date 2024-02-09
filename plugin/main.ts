@@ -13,8 +13,6 @@ import { SemanticSearchSettings, SemanticSearchSettingTab, DEFAULT_SETTINGS } fr
 import { SearchModal } from 'src/search_modal';
 import { Chunk } from 'src/search_modal';
 
-
-
 export default class SemanticSearchPlugin extends Plugin {
 	statusBar: HTMLElement;
 	settings: SemanticSearchSettings;
@@ -30,16 +28,16 @@ export default class SemanticSearchPlugin extends Plugin {
 			console.log('Vector store configured:', configured);
 		});
 
-		this.app.vault.on('modify', async (file) => {
-				try {
-					console.log('UPDATING EMBEDDINGS', file);
-					const result = await this.updateEmbeddings(file);
-					console.log(result);
-				} catch (error) {
-					console.error('Error updating embeddings:', error);
-				}
-			}
-		);
+		// this.app.vault.on('modify', async (file) => {
+		// 		try {
+		// 			console.log('UPDATING EMBEDDINGS', file);
+		// 			const result = await this.updateEmbeddings(file);
+		// 			console.log(result);
+		// 		} catch (error) {
+		// 			console.error('Error updating embeddings:', error);
+		// 		}
+		// 	}
+		// );
 
 		this.addSettingTab(new SemanticSearchSettingTab(this.app, this));
 
@@ -47,7 +45,7 @@ export default class SemanticSearchPlugin extends Plugin {
 			id: 'search',
 			name: 'Search',
 			callback: () => {
-				new SearchModal(this.app).open();
+				new SearchModal(this.app, this.settings).open();
 			}
 		});
 
@@ -91,8 +89,9 @@ export default class SemanticSearchPlugin extends Plugin {
 			callback: async () => {
 				const filePath = 'philosophy/The Prince.md';
 				const file: TFile | null = this.app.vault.getAbstractFileByPath(filePath) as TFile | null;
-				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-				console.log(markdownView?.data);
+
+				// const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
+				// console.log(markdownView?.data);
 
 				if (file && file instanceof TFile) {
 					try {
@@ -120,9 +119,12 @@ export default class SemanticSearchPlugin extends Plugin {
 								'Content-Type': 'application/json',
 							},
 							body: JSON.stringify({
+								vaultPath: this.app.vault.adapter.basePath,
+								dataStorePath: this.settings.dataStorePath,
 								fileName: file.name,
 								filePath: file.path,
-								fileContent: content
+								fileContent: content,
+								chunkSize: 600 // TODO: get from settings
 							})
 						});
 					} catch (error) {
@@ -162,7 +164,7 @@ export default class SemanticSearchPlugin extends Plugin {
 
 	async serverAvailable() {
 		try {
-			const response = await fetch('http://localhost:3003/status', {
+			const response = await fetch('http://localhost:3003/check_status', {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json',
@@ -180,17 +182,18 @@ export default class SemanticSearchPlugin extends Plugin {
 	}
 
 
-	async updateEmbeddings(file: TAbstractFile) {
-		return new Promise((resolve, reject) => {
-			setTimeout(() => {
-				resolve('embeddings updated');
-			}, 10000);
-		});
-	}
+	// async updateEmbeddings(file: TAbstractFile) {
+	// 	return new Promise((resolve, reject) => {
+	// 		setTimeout(() => {
+	// 			resolve('embeddings updated');
+	// 		}, 10000);
+	// 	});
+	// }
+
 
 	async onunload() {
 		console.log('unloading plugin');
-
+		// TODO: remind user to turn off backend server and explain how
 	}
 
 	async loadSettings() {
