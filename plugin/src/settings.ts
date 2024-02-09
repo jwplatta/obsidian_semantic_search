@@ -59,5 +59,6 @@ export class SemanticSearchSettingTab extends PluginSettingTab {
 
 		// TODO: configure model for embeddings
 		// TODO: configure number of similar documents to return
+		// TODO: configure chunk size for embeddings
 	}
 }
