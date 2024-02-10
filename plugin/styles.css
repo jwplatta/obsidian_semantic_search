@@ -6,3 +6,16 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+
+.suggestion-file-name {
+  color: var(--interactive-accent);
+}
+
+.suggestion-file-path {
+  color: var(--text-muted);
+  margin-bottom: 5px; /* Adds a little space between the file path and the text chunk */
+}
+
+.suggestion-text-chunk {
+  font-size: 95%; /* Optionally, make the text chunk slightly smaller */
+}
