@@ -54,3 +54,6 @@ export const embeddingsQuery = `
     matches.distance
   FROM matches
   INNER JOIN note_chunks ON note_chunks.rowid = matches.rowid;`;
+
+export const countVss = 'SELECT count(1) FROM vss_note_chunks';
+export const countChunks = 'SELECT count(1) FROM note_chunks';
