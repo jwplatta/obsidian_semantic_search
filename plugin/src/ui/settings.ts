@@ -39,7 +39,7 @@ export class SemanticSearchSettingTab extends PluginSettingTab {
 			.setName('Embedding Model')
 			.setDesc('Select the model to use for embeddings.')
 			.addDropdown(dropdown => dropdown
-				.addOption('all-MiniLM-L6-v2', 'all-MiniLM-L6-v2')
+				.addOption('Xenova/all-MiniLM-L6-v2', 'all-MiniLM-L6-v2')
 				// TODO:
 				// .addOption('bert-base-uncased', 'bert-base-uncased')
 				// .addOption('text-embedding-ada-002', 'text-embedding-ada-002')
