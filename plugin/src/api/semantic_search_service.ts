@@ -21,8 +21,8 @@ async function get(url: URL) {
 }
 
 /**
- * Embeds a file by sending its details to the server for embedding,
- * creating an embedding, and updating the index.
+ * Embeds a file by any deleting existing embedding,
+ * creating a new embedding, and updating the virtual index.
  *
  * @param fileDetails - The details of the file to be embedded.
  * @returns A Promise that resolves when the embedding process is complete.
@@ -38,7 +38,7 @@ export async function embedFile(fileDetails: Object) {
 }
 
 /**
- * Checks if the server is available by sending a GET request to the specified URL.
+ * Checks if the server is available.
  * @returns A Promise that resolves to a boolean indicating whether the server is available.
  */
 export async function serverAvailable(): Promise<boolean> {
@@ -52,8 +52,7 @@ export async function serverAvailable(): Promise<boolean> {
 }
 
 /**
- * Configures the vector store by sending a POST request to the
- * specified URL with the provided database details.
+ * Configures the vector store with the provided database details.
  *
  * @param dbDetails - The details of the database to be configured.
  * @returns A promise that resolves to true if the configuration is
