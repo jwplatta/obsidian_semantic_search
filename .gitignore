@@ -31,3 +31,5 @@ env
 
 # exclude data stored by obsidian
 data.json
+
+NOTES.md
