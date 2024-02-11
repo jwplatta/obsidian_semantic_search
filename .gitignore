@@ -28,3 +28,6 @@ main.js
 .ipynb_checkpoints
 env
 *.ipynb
+
+# exclude data stored by obsidian
+data.json
