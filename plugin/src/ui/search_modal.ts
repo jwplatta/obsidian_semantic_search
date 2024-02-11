@@ -14,8 +14,10 @@ export class SearchModal extends SuggestModal<Chunk> {
 
   async getSuggestions(query: string): Promise<Chunk[]> {
     const queryDetails = {
+      model: this.settings.embeddingModel,
       vaultPath: this.app.vault.adapter.basePath,
       dataStorePath: this.settings.dataStorePath,
+      dataStoreFilename: this.settings.dataStoreFilename,
       query: query,
       searchResultsCount: this.settings.resultCount
     };

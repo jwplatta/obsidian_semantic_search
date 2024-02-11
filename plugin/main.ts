@@ -23,7 +23,8 @@ export default class SemanticSearchPlugin extends Plugin {
 			} else {
 				const dbDetails = {
 					vaultPath: this.app.vault.adapter.basePath,
-					dataStorePath: this.settings.dataStorePath
+					dataStorePath: this.settings.dataStorePath,
+					dataStoreFilename: this.settings.dataStoreFilename
 				}
 				await configureVectorStore(dbDetails);
 			}
@@ -48,8 +49,10 @@ export default class SemanticSearchPlugin extends Plugin {
 				if (currentFile && currentFile.extension === 'md') {
 					this.app.vault.read(currentFile).then(async content => {
 						const fileDetails = {
+							model: this.settings.embeddingModel,
 							vaultPath: this.app.vault.adapter.basePath,
 							dataStorePath: this.settings.dataStorePath,
+							dataStoreFilename: this.settings.dataStoreFilename,
 							fileName: currentFile.name,
 							filePath: currentFile.path,
 							fileContent: content,
@@ -74,8 +77,10 @@ export default class SemanticSearchPlugin extends Plugin {
 				markdownFiles.forEach(async file => {
 					this.app.vault.read(file).then(async content => {
 						const fileDetails = {
+							model: this.settings.embeddingModel,
 							vaultPath: this.app.vault.adapter.basePath,
 							dataStorePath: this.settings.dataStorePath,
+							dataStoreFilename: this.settings.dataStoreFilename,
 							fileName: file.name,
 							filePath: file.path,
 							fileContent: content,
