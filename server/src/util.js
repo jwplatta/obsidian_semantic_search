@@ -1,27 +1,27 @@
-import fs from 'fs/promises';
-import path from 'path';
+import fs from 'fs/promises'
+import path from 'path'
 
-export async function checkFileExists(filePath) {
+export async function checkFileExists (filePath) {
   try {
-      await fs.access(filePath);
-      return true;
+    await fs.access(filePath)
+    return true
   } catch (error) {
-      return false;
+    return false
   }
 }
 
-export function buildDbPath(reqBody) {
+export function buildDbPath (reqBody) {
   try {
     if (process.env.NODE_ENV === 'docker') {
-      return path.join("/usr/src/server", reqBody.dataStoreFilename);
+      return path.join('/usr/src/server', reqBody.dataStoreFilename)
     } else {
       return path.join(
         reqBody.vaultPath,
         reqBody.dataStorePath,
         reqBody.dataStoreFilename
-      );
+      )
     }
   } catch (error) {
-    throw new Error("Error building db path: ", error);
+    throw new Error('Error building db path: ', error)
   }
 }

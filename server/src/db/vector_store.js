@@ -1,115 +1,115 @@
-import sqlite3 from 'better-sqlite3';
-import * as sqlite_vss from "sqlite-vss";
-import { pipeline } from '@xenova/transformers';
-import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import * as tf from '@tensorflow/tfjs';
+import Sqlite3 from 'better-sqlite3'
+import * as sqliteVss from 'sqlite-vss'
+import { pipeline } from '@xenova/transformers'
+import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter'
+import * as tf from '@tensorflow/tfjs'
 import {
   countVss, countChunks, createEmbeddingsTable,
   createVirtualTable, insertNoteChunk,
   insertEmbeddingsIntoVSS, deleteFromVss,
   deleteFromNoteChunks, embeddingsQuery
-} from './sql.js';
+} from './sql.js'
 
 export class VectorStore {
-  constructor(dbPath) {
-    this.db = new sqlite3(dbPath);
-    sqlite_vss.load(this.db);
-	}
+  constructor (dbPath) {
+    this.db = new Sqlite3(dbPath)
+    sqliteVss.load(this.db)
+  }
 
-  chunk_cnt() {
+  chunk_cnt () {
     try {
       const chunkCount = this.db.prepare(countChunks).pluck().get()
-      return chunkCount;
+      return chunkCount
     } catch (error) {
-      throw new Error("Error VectorStore.chunk_cnt: ", error);
+      throw new Error('Error VectorStore.chunk_cnt: ', error)
     }
   }
 
-  size() {
+  size () {
     try {
       const vssCount = this.db.prepare(countVss).pluck().get()
-      return vssCount;
+      return vssCount
     } catch (error) {
-      throw new Error("Error VectorStore.size: ", error);
+      throw new Error('Error VectorStore.size: ', error)
     }
   }
 
-  async embed(chunkSize, chunkOverlap, model, fileContent, fileName, filePath) {
-    const embedder = await pipeline('feature-extraction', model);
+  async embed (chunkSize, chunkOverlap, model, fileContent, fileName, filePath) {
+    const embedder = await pipeline('feature-extraction', model)
     const splitter = new RecursiveCharacterTextSplitter({
-      chunkSize: chunkSize,
-      chunkOverlap: chunkOverlap
-    });
-    const chunks = await splitter.createDocuments([fileContent]);
-    return chunks.map(async(chunk, index) => {
+      chunkSize: chunkSize | 500,
+      chunkOverlap: chunkOverlap | 100
+    })
+    const chunks = await splitter.createDocuments([fileContent])
+    return chunks.map(async (chunk, index) => {
       try {
-        const embeddings = await embedder([chunk.pageContent]);
-        const meanTensor = tf.tensor(embeddings[0]['data'])
-            .reshape(embeddings[0]['dims'])
-            .mean(0);
-        const embeddingJSON = JSON.stringify(meanTensor.arraySync());
+        const embeddings = await embedder([chunk.pageContent])
+        const meanTensor = tf.tensor(embeddings[0].data)
+          .reshape(embeddings[0].dims)
+          .mean(0)
+        const embeddingJSON = JSON.stringify(meanTensor.arraySync())
 
         this.db.prepare(insertNoteChunk)
-          .run(fileName, filePath, chunk.pageContent, embeddingJSON);
+          .run(fileName, filePath, chunk.pageContent, embeddingJSON)
       } catch (error) {
-        throw new Error("Error VectorStore.embed: ", error);
+        throw new Error('Error VectorStore.embed: ', error)
       }
-    });
+    })
   }
 
-  updateIndex(fileName) {
-    try{
-      this.db.prepare(insertEmbeddingsIntoVSS).run(fileName);
+  updateIndex (fileName) {
+    try {
+      this.db.prepare(insertEmbeddingsIntoVSS).run(fileName)
     } catch (error) {
-      throw new Error("Error VectorStore.updateIndex: ", error);
+      throw new Error('Error VectorStore.updateIndex: ', error)
     }
   }
 
-  deleteFileChunks(fileName) {
+  deleteFileChunks (fileName) {
     this.wrapInTransaction(() => {
-      this.db.prepare(deleteFromVss).run(fileName);
-      this.db.prepare(deleteFromNoteChunks).run(fileName);
-    });
+      this.db.prepare(deleteFromVss).run(fileName)
+      this.db.prepare(deleteFromNoteChunks).run(fileName)
+    })
   }
 
-  async query(queryString, searchResultsCount, model) {
-    const embedder = await pipeline('feature-extraction', model);
-    const embeddings = await embedder([queryString]);
-    const queryEmbedding = tf.tensor(embeddings[0]['data'])
-      .reshape(embeddings[0]['dims'])
-      .mean(0);
+  async query (queryString, searchResultsCount, model) {
+    const embedder = await pipeline('feature-extraction', model)
+    const embeddings = await embedder([queryString])
+    const queryEmbedding = tf.tensor(embeddings[0].data)
+      .reshape(embeddings[0].dims)
+      .mean(0)
 
     try {
       const searchResults = this.db.prepare(embeddingsQuery).all(
-        "[" + queryEmbedding.arraySync().toString() + "]",
+        '[' + queryEmbedding.arraySync().toString() + ']',
         searchResultsCount
-      );
-      return searchResults;
+      )
+      return searchResults
     } catch (error) {
-      throw new Error("Error VectorStore.query: ", error);
+      throw new Error('Error VectorStore.query: ', error)
     }
   }
 
-  wrapInTransaction(func) {
-    this.db.exec('BEGIN');
+  wrapInTransaction (func) {
+    this.db.exec('BEGIN')
 
     try {
-      func();
-      this.db.exec('COMMIT');
-      return true;
+      func()
+      this.db.exec('COMMIT')
+      return true
     } catch (error) {
-      console.error(error);
-      this.db.exec('ROLLBACK');
-      return false;
+      console.error(error)
+      this.db.exec('ROLLBACK')
+      return false
     }
   }
 
-  configure() {
+  configure () {
     try {
-      this.db.prepare(createEmbeddingsTable).run();
-      this.db.prepare(createVirtualTable).run();
+      this.db.prepare(createEmbeddingsTable).run()
+      this.db.prepare(createVirtualTable).run()
     } catch (error) {
-      throw new Error("Error VectorStore.configure: ", error);
+      throw new Error('Error VectorStore.configure: ', error)
     }
   }
 }
