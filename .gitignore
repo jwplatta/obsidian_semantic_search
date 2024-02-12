@@ -35,3 +35,4 @@ data.json
 NOTES.md
 
 create_embeddings.js
+semantic_search.db
