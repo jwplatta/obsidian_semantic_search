@@ -1,0 +1,9 @@
+{
+    "uid": "semantic_search_server",
+    "append": true,
+    "watch": true,
+    "script": "index.js",
+    "logFile": "/Users/jplatta/logs/semantic_search_server_forever.log",
+    "outFile": "/Users/jplatta/logs/semantic_search_server_out.log",
+    "errFile": "/Users/jplatta/logs/semantic_search_server_error.log"
+}

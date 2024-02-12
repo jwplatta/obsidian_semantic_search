@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "nodemon index.js",
     "build": "",
-    "prod": "",
+    "prod": "forever start prod.json",
+    "stop-prod": "forever stop semantic_search_server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Joseph Platta",
