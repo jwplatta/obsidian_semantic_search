@@ -1,5 +1,5 @@
 import {
-    Plugin, TFile
+    Plugin, TFile, FileSystemAdapter
 } from 'obsidian';
 import { SemanticSearchSettings, SemanticSearchSettingTab, DEFAULT_SETTINGS } from 'src/ui/settings';
 import { SearchModal } from 'src/ui/search_modal';
@@ -13,7 +13,6 @@ export default class SemanticSearchPlugin extends Plugin {
 
     async onload() {
         await this.loadSettings();
-
         await serverAvailable().then(async (available: boolean) => {
             if (!available) {
                 new MessageModal(
@@ -22,7 +21,7 @@ export default class SemanticSearchPlugin extends Plugin {
 			  ).open();
             } else {
                 const dbDetails = {
-                    vaultPath: this.app.vault.adapter.basePath,
+                    vaultPath: this.getBasePath(),
                     dataStorePath: this.settings.dataStorePath,
                     dataStoreFilename: this.settings.dataStoreFilename
                 };
@@ -36,7 +35,7 @@ export default class SemanticSearchPlugin extends Plugin {
             id: 'search',
             name: 'Search',
             callback: () => {
-                new SearchModal(this.app, this.settings).open();
+                new SearchModal(this.app, this.settings, this.getBasePath()).open();
             }
         });
 
@@ -50,7 +49,7 @@ export default class SemanticSearchPlugin extends Plugin {
                     this.app.vault.read(currentFile).then(async content => {
                         const fileDetails = {
                             model: this.settings.embeddingModel,
-                            vaultPath: this.app.vault.adapter.basePath,
+                            vaultPath: this.getBasePath(),
                             dataStorePath: this.settings.dataStorePath,
                             dataStoreFilename: this.settings.dataStoreFilename,
                             fileName: currentFile.name,
@@ -78,7 +77,7 @@ export default class SemanticSearchPlugin extends Plugin {
                     this.app.vault.read(file).then(async content => {
                         const fileDetails = {
                             model: this.settings.embeddingModel,
-                            vaultPath: this.app.vault.adapter.basePath,
+                            vaultPath: this.getBasePath(),
                             dataStorePath: this.settings.dataStorePath,
                             dataStoreFilename: this.settings.dataStoreFilename,
                             fileName: file.name,
@@ -96,8 +95,15 @@ export default class SemanticSearchPlugin extends Plugin {
         });
     }
 
+    getBasePath(): string {
+        let adapter = this.app.vault.adapter;
+        if (adapter instanceof FileSystemAdapter) {
+            return adapter.getBasePath();
+        }
+        return '/';
+    }
+
     async onunload() {
-        console.log('unloading Semantic Search');
         new MessageModal(
             this.app,
             'The Semantic Search plugin has been unloaded. Please turn off the server.'
@@ -107,7 +113,6 @@ export default class SemanticSearchPlugin extends Plugin {
     async loadSettings() {
         console.log(DEFAULT_SETTINGS);
         this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-        console.log('Loaded settings: ', this.settings);
     }
 
     async saveSettings() {

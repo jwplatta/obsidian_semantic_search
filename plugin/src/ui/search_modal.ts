@@ -6,16 +6,18 @@ import { Chunk } from 'src/chunk_interface';
 
 export class SearchModal extends SuggestModal<Chunk> {
     settings: SemanticSearchSettings;
+    vaultPath: string;
 
-    constructor(app: App, settings: SemanticSearchSettings) {
+    constructor(app: App, settings: SemanticSearchSettings, vaultPath: string) {
         super(app);
         this.settings = settings;
+        this.vaultPath = vaultPath;
     }
 
     async getSuggestions(query: string): Promise<Chunk[]> {
         const queryDetails = {
             model: this.settings.embeddingModel,
-            vaultPath: this.app.vault.adapter.basePath,
+            vaultPath: this.vaultPath,
             dataStorePath: this.settings.dataStorePath,
             dataStoreFilename: this.settings.dataStoreFilename,
             query: query,

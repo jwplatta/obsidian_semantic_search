@@ -3,7 +3,7 @@ import {
     PluginSettingTab,
     Setting
 } from 'obsidian';
-import { SemanticSearchPlugin } from 'main';
+import SemanticSearchPlugin from 'main';
 
 export interface SemanticSearchSettings {
 	embeddingModel: string;
