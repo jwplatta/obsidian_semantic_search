@@ -17,6 +17,12 @@ export const insertEmbeddingsIntoVSS = `
   INSERT INTO vss_note_chunks(rowid, embedding)
   SELECT rowid, embedding
   FROM note_chunks
+`
+
+export const insertFileEmbeddingsIntoVSS = `
+  INSERT INTO vss_note_chunks(rowid, embedding)
+  SELECT rowid, embedding
+  FROM note_chunks
   WHERE file_name = ?
 `
 
@@ -25,14 +31,30 @@ export const insertNoteChunk = `
   VALUES (?, ?, ?, ?)
 `
 
-export const deleteFromVss = `
+export function insertMultipleNoteChunks (chunkCount) {
+  const placeholders = Array(chunkCount).fill('(?, ?, ?, ?)').join(',')
+  return `INSERT INTO note_chunks (file_name, file_path, text_chunk, embedding)
+    VALUES ${placeholders}`
+}
+
+export const deleteFileFromVss = `
   DELETE FROM vss_note_chunks
   WHERE rowid IN (
     SELECT rowid FROM note_chunks WHERE file_name = ?
   )
 `
 
-export const deleteFromNoteChunks = 'DELETE FROM note_chunks WHERE file_name = ?'
+export const deleteFromVss = `
+  DELETE FROM vss_note_chunks
+`
+
+export const deleteFileFromNoteChunks = 'DELETE FROM note_chunks WHERE file_name = ?'
+
+export function deleteFilesFromNoteChunks (fileNames) {
+  const placeholders = fileNames.map(() => '?').join(',')
+  return `DELETE FROM note_chunks
+    WHERE file_name in (${placeholders})`
+}
 
 export const embeddingsQuery = `
   WITH matches AS (
