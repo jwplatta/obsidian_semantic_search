@@ -8,8 +8,6 @@ import SemanticSearchPlugin from 'main';
 export interface SemanticSearchSettings {
 	embeddingModel: string;
 	apiKey: string;
-	dataStorePath: string;
-	dataStoreFilename: string;
 	chunkSize: number;
 	resultCount: number;
 }
@@ -17,8 +15,6 @@ export interface SemanticSearchSettings {
 export const DEFAULT_SETTINGS: SemanticSearchSettings = {
     embeddingModel: 'all-MiniLM-L6-v2',
     apiKey: '',
-    dataStorePath: '',
-    dataStoreFilename: 'semantic_search.db',
     chunkSize: 500,
     resultCount: 5
 };
@@ -68,35 +64,6 @@ export class SemanticSearchSettingTab extends PluginSettingTab {
                 .setDisabled((this.plugin.settings.embeddingModel === 'gpt-3') ? false : true)
                 .onChange(async (value) => {
                     this.plugin.settings.apiKey = value;
-                    await this.plugin.saveSettings();
-                })
-                .then((cb) => {
-                    cb.inputEl.style.width = '100%';
-                }));
-
-        new Setting(containerEl)
-            .setName('Data Store Path')
-            .setDesc('Enter the path to the vector store here.')
-            .addText(text => text
-                .setPlaceholder('Data Store Path')
-                .setValue(this.plugin.settings.dataStorePath)
-                .onChange(async (value) => {
-                    // TODO: move the vector store to the new path if it exists
-                    this.plugin.settings.dataStorePath = value;
-                    await this.plugin.saveSettings();
-                })
-                .then((cb) => {
-                    cb.inputEl.style.width = '100%';
-                }));
-
-	  new Setting(containerEl)
-            .setName('Data Store Filename')
-            .setDesc('Enter the filename for the vector store here.')
-            .addText(text => text
-                .setPlaceholder('Data Store Filename')
-                .setValue(this.plugin.settings.dataStoreFilename)
-                .onChange(async (value) => {
-                    this.plugin.settings.dataStoreFilename = value;
                     await this.plugin.saveSettings();
                 })
                 .then((cb) => {
