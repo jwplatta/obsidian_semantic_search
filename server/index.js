@@ -10,6 +10,20 @@ const PORT = process.env.PORT || 3003
 
 app.get('/check_status', (req, res) => { res.sendStatus(200) })
 
+app.post('/info', (req, res) => {
+  const vectDb = new VectorStore(buildDbPath(req.body))
+
+  vectDb.info((err, result) => {
+    if (err) {
+      console.error(err)
+      res.sendStatus(500)
+    } else {
+      console.log('result: ', result)
+      res.status(200).json(result)
+    }
+  })
+})
+
 app.post('/configure_db', (req, res) => {
   try {
     new VectorStore(buildDbPath(req.body)).configure()
@@ -20,17 +34,19 @@ app.post('/configure_db', (req, res) => {
   }
 })
 
-app.post('/create_embedding', async (req, res) => {
+app.post('/embed_file', async (req, res) => {
   const vectDb = new VectorStore(buildDbPath(req.body))
+
   try {
-    await vectDb.embed(
+    vectDb.embed_file(
       req.body.chunkSize,
       50,
       req.body.model,
-      req.body.fileContent,
       req.body.fileName,
-      req.body.filePath
+      req.body.filePath,
+      req.body.vaultPath
     )
+
     res.sendStatus(200)
   } catch (error) {
     console.error(error)
@@ -38,10 +54,17 @@ app.post('/create_embedding', async (req, res) => {
   }
 })
 
-app.post('/delete_embedding', async (req, res) => {
+app.post('/embed_batch', async (req, res) => {
+  const vectDb = new VectorStore(buildDbPath(req.body))
   try {
-    new VectorStore(buildDbPath(req.body))
-      .deleteFileChunks(req.body.fileName)
+    await vectDb.embed_batch(
+      req.body.chunkSize,
+      50,
+      req.body.model,
+      req.body.files,
+      req.body.vaultPath
+    )
+
     res.sendStatus(200)
   } catch (error) {
     console.error(error)
@@ -49,12 +72,31 @@ app.post('/delete_embedding', async (req, res) => {
   }
 })
 
-app.post('/update_index', async (req, res) => {
+app.post('/embedded_files', async (req, res) => {
   try {
-    const vectDb = new VectorStore(buildDbPath(req.body))
-    vectDb.updateIndex(req.body.fileName)
-    // console.log("vect_db.size(): ", vect_db.size());
+    const fileNames = new VectorStore(buildDbPath(req.body)).fileNames()
+    console.log('fileNames: ', fileNames)
+    res.status(200).json(fileNames)
+  } catch (error) {
+    console.error(error)
+    res.sendStatus(500)
+  }
+})
 
+app.post('/reset', async (req, res) => {
+  try {
+    new VectorStore(buildDbPath(req.body)).reset()
+    res.sendStatus(200)
+  } catch (error) {
+    console.error(error)
+    res.sendStatus(500)
+  }
+})
+
+app.post('/update_index', (req, res) => {
+  console.log(req.body)
+  try {
+    new VectorStore(buildDbPath(req.body)).updateIndex()
     res.sendStatus(200)
   } catch (error) {
     console.error(error)
@@ -68,12 +110,22 @@ app.post('/query', async (req, res) => {
     return
   }
 
+  const vectDb = new VectorStore(buildDbPath(req.body))
+
   try {
-    const searchResults = await new VectorStore(buildDbPath(req.body)).query(
+    console.log(vectDb.size())
+  } catch (error) {
+    console.error(error)
+    res.sendStatus(500)
+  }
+
+  try {
+    const searchResults = await vectDb.query(
       req.body.query,
       req.body.searchResultsCount,
       req.body.model
     )
+
     res.status(200).json(searchResults)
   } catch (error) {
     console.error(error)
