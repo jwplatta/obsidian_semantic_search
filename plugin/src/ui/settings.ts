@@ -10,13 +10,15 @@ export interface SemanticSearchSettings {
 	apiKey: string;
 	chunkSize: number;
 	resultCount: number;
+    batchSize: number;
 }
 
 export const DEFAULT_SETTINGS: SemanticSearchSettings = {
     embeddingModel: 'all-MiniLM-L6-v2',
     apiKey: '',
     chunkSize: 500,
-    resultCount: 5
+    resultCount: 5,
+    batchSize: 20
 };
 
 export class SemanticSearchSettingTab extends PluginSettingTab {
@@ -87,7 +89,7 @@ export class SemanticSearchSettingTab extends PluginSettingTab {
                 })
             );
 
-	  new Setting(containerEl)
+	    new Setting(containerEl)
             .setName('Search Result Count')
             .setDesc('Enter the number of similar documents to return')
             .addText(text => text
@@ -99,6 +101,24 @@ export class SemanticSearchSettingTab extends PluginSettingTab {
                         this.plugin.settings.resultCount = resultCount;
                     } else {
                         this.plugin.settings.resultCount = DEFAULT_SETTINGS.resultCount;
+                    }
+                    await this.plugin.saveSettings();
+                })
+            );
+
+        new Setting(containerEl)
+            .setName('Embedding Batch Size')
+            .setDesc('Enter the batch size for embeddings')
+            .addText(text => text
+                .setPlaceholder('Embedding Batch Size')
+                .setValue('500')
+                .setDisabled(true)
+                .onChange(async (value) => {
+                    const batchSize = parseInt(value, 20);
+                    if (Number.isInteger(batchSize)) {
+                        this.plugin.settings.batchSize = batchSize;
+                    } else {
+                        this.plugin.settings.batchSize = DEFAULT_SETTINGS.batchSize;
                     }
                     await this.plugin.saveSettings();
                 })
