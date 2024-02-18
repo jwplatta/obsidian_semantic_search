@@ -15,10 +15,8 @@ app.post('/info', (req, res) => {
 
   vectDb.info((err, result) => {
     if (err) {
-      console.error(err)
       res.sendStatus(500)
     } else {
-      console.log('result: ', result)
       res.status(200).json(result)
     }
   })
@@ -38,7 +36,7 @@ app.post('/embed_file', async (req, res) => {
   const vectDb = new VectorStore(buildDbPath(req.body))
 
   try {
-    vectDb.embed_file(
+    vectDb.embedFile(
       req.body.chunkSize,
       50,
       req.body.model,
@@ -57,7 +55,7 @@ app.post('/embed_file', async (req, res) => {
 app.post('/embed_batch', async (req, res) => {
   const vectDb = new VectorStore(buildDbPath(req.body))
   try {
-    await vectDb.embed_batch(
+    await vectDb.embedBatch(
       req.body.chunkSize,
       50,
       req.body.model,
