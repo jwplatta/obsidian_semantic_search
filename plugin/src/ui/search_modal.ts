@@ -18,8 +18,7 @@ export class SearchModal extends SuggestModal<Chunk> {
         const queryDetails = {
             model: this.settings.embeddingModel,
             vaultPath: this.vaultPath,
-            dataStorePath: this.settings.dataStorePath,
-            dataStoreFilename: this.settings.dataStoreFilename,
+            pluginPath: this.vaultPath + '/.obsidian/plugins/semantic_search',
             query: query,
             searchResultsCount: this.settings.resultCount
         };
