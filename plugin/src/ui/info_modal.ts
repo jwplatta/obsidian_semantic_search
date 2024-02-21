@@ -14,8 +14,8 @@ export class InfoModal extends Modal {
     onOpen() {
         const { contentEl } = this;
         contentEl.createEl('h4', { text: 'Semantic Search Info' });
-        contentEl.createEl('p', { text: "Note Chunk Count: " + this.message.chunkCnt.toString() });
-        contentEl.createEl('p', { text: "Index Size: " + this.message.vssSize.toString() });
+        contentEl.createEl('p', { text: 'Note Chunk Count: ' + this.message.chunkCnt.toString() });
+        contentEl.createEl('p', { text: 'Index Size: ' + this.message.vssSize.toString() });
     }
 
     onClose() {
