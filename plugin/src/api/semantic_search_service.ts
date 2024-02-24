@@ -1,15 +1,8 @@
 import { Chunk } from 'src/chunk_interface';
+import { DbDetails } from 'src/db_details_interface';
+import { FileDetails } from 'src/file_details_interface';
+import { QueryDetails } from 'src/query_details_interface';
 
-// TODO: export class SemanticSearchService
-async function post(url: URL, body: Object): Promise<Response>{
-    return await fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body)
-    });
-}
 
 async function get(url: URL) {
     return await fetch(url, {
@@ -20,6 +13,22 @@ async function get(url: URL) {
     });
 }
 
+export async function embeddingsInfo(dbDetails: DbDetails) {
+    try {
+        const response = await fetch(new URL('http://localhost:3003/info'), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(dbDetails)
+        });
+        const info = await response.json();
+        return info;
+    } catch (error) {
+        console.error('Error getting embedding info: ', error, dbDetails);
+    }
+}
+
 /**
  * Embeds a file by any deleting existing embedding,
  * creating a new embedding, and updating the virtual index.
@@ -27,13 +36,47 @@ async function get(url: URL) {
  * @param fileDetails - The details of the file to be embedded.
  * @returns A Promise that resolves when the embedding process is complete.
  */
-export async function embedFile(fileDetails: Object) {
+export async function embedFile(file: FileDetails) {
     try {
-        await post(new URL('http://localhost:3003/delete_embedding'), fileDetails);
-        await post(new URL('http://localhost:3003/create_embedding'), fileDetails);
-        await post(new URL('http://localhost:3003/update_index'), fileDetails);
+        return await fetch(new URL('http://localhost:3003/embed_file'), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(file)
+        });
     } catch (error) {
-        console.error('Error embedding file:', error);
+        console.error('Error embedding file:', error, file);
+    }
+}
+
+export async function embedBatch(files: FileDetails[], embeddingModel: string, vaultPath: string, pluginPath: string, chunkSize: number) {
+    return await fetch(new URL('http://localhost:3003/embed_batch'), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            model: embeddingModel,
+            vaultPath: vaultPath,
+            pluginPath: pluginPath,
+            chunkSize: chunkSize,
+            files: files
+        })
+    });
+}
+
+export async function updateEmbeddingIndex(dbDetails: DbDetails) {
+    try {
+        return await fetch(new URL('http://localhost:3003/update_index'), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(dbDetails)
+        });
+    } catch (error) {
+        console.error('Error updating embedding index:', error, dbDetails);
     }
 }
 
@@ -44,6 +87,9 @@ export async function embedFile(fileDetails: Object) {
 export async function serverAvailable(): Promise<boolean> {
     return await get(new URL('http://localhost:3003/check_status'))
         .then((response) => {
+            if (!response.ok) {
+                return false;
+            }
             return true;
         }).catch(error => {
             console.error('Error checking server status: ', error);
@@ -58,14 +104,22 @@ export async function serverAvailable(): Promise<boolean> {
  * @returns A promise that resolves to true if the configuration is
  * successful, or false if there is an error.
  */
-export async function configureVectorStore(dbDetails: Object) {
-    await post(new URL('http://localhost:3003/configure_db'), dbDetails)
-        .then(response => {
-            return true;
-        }).catch(error => {
-            console.error('Error configuring vector store: ', error);
+export async function configureVectorStore(dbDetails: DbDetails) {
+    return await fetch(new URL('http://localhost:3003/configure_db'), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dbDetails)
+    }).then(response => {
+        if (!response.ok) {
             return false;
-        });
+        }
+        return true;
+    }).catch(error => {
+        console.error('Error configuring vector store: ', error);
+        return false;
+    });
 }
 
 /**
@@ -75,8 +129,17 @@ export async function configureVectorStore(dbDetails: Object) {
  * @returns A promise that resolves to an array of Chunk objects if
  * the query is successful, otherwise an empty array.
  */
-export async function queryNoteChunks(queryDetails: Object) : Promise<Chunk[] | []> {
-    const response = await post(new URL('http://localhost:3003/query'), queryDetails);
+export async function queryNoteChunks(queryDetails: QueryDetails): Promise<Chunk[] | []> {
+    const response = await fetch(new URL('http://localhost:3003/query'), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(queryDetails)
+    });
+
+    console.log(response);
+
     if (response.ok) {
         const chunks = await response.json();
         return chunks;
