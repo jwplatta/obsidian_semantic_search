@@ -1,5 +1,5 @@
 import {
-    Plugin, TFile, FileSystemAdapter
+    Plugin, TFile, FileSystemAdapter, Notice
 } from 'obsidian';
 import { SemanticSearchSettings, SemanticSearchSettingTab, DEFAULT_SETTINGS } from 'src/ui/settings';
 import { SearchModal } from 'src/ui/search_modal';
@@ -11,7 +11,9 @@ import {
     serverAvailable,
     configureVectorStore,
     updateEmbeddingIndex,
-    embeddingsInfo
+    embeddingsInfo,
+    embeddedFiles,
+    resetEmbeddingIndex
 } from 'src/api/semantic_search_service';
 
 
@@ -62,6 +64,21 @@ export default class SemanticSearchPlugin extends Plugin {
         });
 
         this.addCommand({
+            id: 'reset-embedding-index',
+            name: 'Reset Index',
+            callback: async () => {
+                const dbDetails = {
+                    vaultPath: this.getBasePath(),
+                    pluginPath: this.getBasePath() + '/.obsidian/plugins/semantic_search'
+                };
+
+                await resetEmbeddingIndex(dbDetails);
+
+                new Notice('VSS Index reset.');
+            }
+        });
+
+        this.addCommand({
             id: 'search',
             name: 'Search',
             callback: () => {
@@ -73,40 +90,21 @@ export default class SemanticSearchPlugin extends Plugin {
             id: 'unindexed-files',
             name: 'Unindexed Files',
             callback: async () => {
-                // TODO: move to service file
                 const dbDetails = {
                     vaultPath: this.getBasePath(),
                     pluginPath: this.getBasePath() + '/.obsidian/plugins/semantic_search'
                 };
-                const response = await fetch(new URL('http://localhost:3003/embedded_files'), {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(dbDetails)
-                });
 
-                const responseJSON = await response.json();
-
-                const fileNames = responseJSON.map((file: any) => file.file_name);
-                console.log('fileNames:\n', fileNames);
-
+                const fileNames = await embeddedFiles(dbDetails);
                 const markdownFiles: TFile[] = this.app.vault.getMarkdownFiles();
-                console.log('markdownFiles in Vault:\n', markdownFiles.length);
-
                 const filteredMarkdownFiles = markdownFiles.filter(file => !fileNames.includes(file.name));
-                console.log('filteredMarkdownFiles:\n', filteredMarkdownFiles);
-
                 const filteredFileNames = filteredMarkdownFiles.map(file => file.name);
-                // const indexedFiles = fileNames.map((fileName: string) => {
-                //     return markdownFiles.find((file) => file.name === fileName);
-                // });
                 new MessageModal(
                     this.app,
                     filteredFileNames.join('\n')
                 ).open();
             }
-        })
+        });
 
         this.addCommand({
             id: 'embed-file',
@@ -152,7 +150,6 @@ export default class SemanticSearchPlugin extends Plugin {
             id: 'embed-vault',
             name: 'Embed Vault',
             callback: async () => {
-                // TODO: Move to service file
                 const markdownFiles: TFile[] = this.app.vault.getMarkdownFiles();
                 const fileCount = markdownFiles.length;
                 console.log('Embedding ', fileCount, ' files.');
@@ -173,7 +170,7 @@ export default class SemanticSearchPlugin extends Plugin {
                 }
 
                 for (const batch of batches) {
-                    const response = embedBatch(
+                    const response = await embedBatch(
                         batch,
                         this.settings.embeddingModel,
                         this.getBasePath(),
@@ -185,17 +182,7 @@ export default class SemanticSearchPlugin extends Plugin {
                     this.embedStatusBar.setText(`Embedded file ${embeddedCount} of ${fileCount}`);
                 }
 
-                const dbDetails = {
-                    vaultPath: this.getBasePath(),
-                    pluginPath: this.getBasePath() + '/.obsidian/plugins/semantic_search'
-                };
-                try {
-                    updateEmbeddingIndex(dbDetails);
-                } catch (error) {
-                    console.error('Error updating embedding index:', error, dbDetails);
-                }
-
-                console.log('Done embedding vault.');
+                new Notice('Vault embedding complete. Update VSS Index.');
             }
         });
     }
