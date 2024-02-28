@@ -21,3 +21,10 @@ export interface QueryDetails {
   query: string;
   searchResultsCount: number;
 }
+
+export interface EmbeddingParams {
+  model: string;
+  vaultPath: string;
+  pluginPath: string;
+  chunkSize: number;
+}

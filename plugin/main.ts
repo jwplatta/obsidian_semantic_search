@@ -115,14 +115,17 @@ export default class SemanticSearchPlugin extends Plugin {
                 if (currentFile && currentFile.extension === 'md') {
                     try {
                         const fileDetails = {
+                            fileName: currentFile.name,
+                            filePath: currentFile.path,
+                        };
+                        const embeddingParams = {
                             model: this.settings.embeddingModel,
                             vaultPath: this.getBasePath(),
                             pluginPath: this.getBasePath() + '/.obsidian/plugins/semantic_search',
-                            fileName: currentFile.name,
-                            filePath: currentFile.path,
                             chunkSize: this.settings.chunkSize
                         };
-                        embedFile(fileDetails);
+
+                        embedFile(fileDetails, embeddingParams);
                     } catch (error) {
                         console.error('Error embedding file:', error);
                     }
@@ -153,6 +156,12 @@ export default class SemanticSearchPlugin extends Plugin {
                 const markdownFiles: TFile[] = this.app.vault.getMarkdownFiles();
                 const fileCount = markdownFiles.length;
                 console.log('Embedding ', fileCount, ' files.');
+                const embeddingParams = {
+                    model: this.settings.embeddingModel,
+                    vaultPath: this.getBasePath(),
+                    pluginPath: this.getBasePath() + '/.obsidian/plugins/semantic_search',
+                    chunkSize: this.settings.chunkSize
+                };
 
                 let embeddedCount = 0;
                 this.embedStatusBar.setText(`Embedded file ${embeddedCount} of ${fileCount}`);
@@ -172,10 +181,7 @@ export default class SemanticSearchPlugin extends Plugin {
                 for (const batch of batches) {
                     const response = await embedBatch(
                         batch,
-                        this.settings.embeddingModel,
-                        this.getBasePath(),
-                        this.getBasePath() + '/.obsidian/plugins/semantic_search',
-                        this.settings.chunkSize
+                        embeddingParams
                     );
                     console.log(response);
                     embeddedCount += batch.length;
