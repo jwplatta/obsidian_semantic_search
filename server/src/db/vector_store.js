@@ -62,8 +62,7 @@ export class VectorStore {
     try {
       this.deleteFileEmbedding(fileName)
       await this.createEmbedding(chunkSize, chunkOverlap, model, fileName, filePath, vaultPath)
-      await this.updateFileIndex(fileName)
-      console.log('embedFile - VSS Size ', this.size())
+      this.updateFileIndex(fileName)
     } catch (error) {
       throw new Error('Error VectorStore.embed_file: ', error)
     }
@@ -81,13 +80,7 @@ export class VectorStore {
   deleteFilesEmbedding (fileNames) {
     const deleteFilesFromNoteChunksSQL = deleteFilesFromNoteChunks(fileNames)
     this.db.prepare(deleteFilesFromNoteChunksSQL).run(...fileNames)
-    console.log('deleteFilesEmbedding - chunk cnt: ', this.chunkCount())
-  }
-
-  createFileEmbeddings (chunkSize, chunkOverlap, model, files, vaultPath) {
-    files.forEach((file) => {
-      this.createEmbedding(chunkSize, chunkOverlap, model, file.fileName, file.filePath, vaultPath)
-    })
+    console.log('deleteFilesEmbedding: ', this.chunkCount())
   }
 
   async embedBatch (chunkSize, chunkOverlap, model, files, vaultPath) {
@@ -96,6 +89,7 @@ export class VectorStore {
 
     const fileNames = files.map((file) => { return file.fileName })
     this.deleteFilesEmbedding(fileNames)
+
     await files.forEach(async (file) => {
       await this.createEmbedding(chunkSize, chunkOverlap, model, file.fileName, file.filePath, vaultPath)
     })
@@ -139,13 +133,14 @@ export class VectorStore {
   }
 
   updateIndex () {
-    console.log(insertEmbeddingsIntoVSS)
-    this.db.prepare(deleteFromVss).run()
-    this.db.prepare(insertEmbeddingsIntoVSS).run()
+    this.wrapInTransaction(() => {
+      this.db.prepare(deleteFromVss).run()
+      this.db.prepare(insertEmbeddingsIntoVSS).run()
+    })
   }
 
-  async updateFileIndex (fileName) {
-    await this.db.prepare(insertFileEmbeddingsIntoVSS).run(fileName)
+  updateFileIndex (fileName) {
+    this.db.prepare(insertFileEmbeddingsIntoVSS).run(fileName)
   }
 
   reset () {
