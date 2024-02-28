@@ -33,12 +33,11 @@ Before your first search, use the **Embed Vault** command to add all the files i
   <img src="./docs/search.gif" width="400">
 </p>
 
-## Install & Setup
+## Search Server
 
 The current design requires a server to be running to handle the search requests. The server is a simple node app that implements an express server. You can configure the server to run on a specific port.
 
-To run the server in the server in the background, first clone the repository and install the dependencies and then run the prod script:
-
+Clone the repository, install the dependencies, and then run the prod script to start the server in the background:
 ```bash
 $ cd obsidian-semantic-search
 $ npm install
