@@ -125,7 +125,8 @@ export default class SemanticSearchPlugin extends Plugin {
                             chunkSize: this.settings.chunkSize
                         };
 
-                        embedFile(fileDetails, embeddingParams);
+                        await embedFile(fileDetails, embeddingParams);
+                        new Notice(`${currentFile.name} successfully embedded.`);
                     } catch (error) {
                         console.error('Error embedding file:', error);
                     }
