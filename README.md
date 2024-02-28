@@ -1,6 +1,6 @@
 # Obsidian Semantic Search
 
-Simple interface for semantic search over markdown files in an Obsidian vault. The project is an experimental and work in progress. A longer description of the implementation can be found [here]().
+Simple interface for semantic search over markdown files in an Obsidian vault. The project is experimental and a work in progress. A longer description of the implementation can be found [here]().
 
 ## Usage
 
