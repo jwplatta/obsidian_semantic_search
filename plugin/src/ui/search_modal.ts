@@ -1,7 +1,7 @@
 import { App, SuggestModal } from 'obsidian';
 import { SemanticSearchSettings } from 'src/ui/settings';
 import { queryNoteChunks } from 'src/api/semantic_search_service';
-import { Chunk } from 'src/chunk_interface';
+import { Chunk } from 'src/interfaces';
 
 
 export class SearchModal extends SuggestModal<Chunk> {
@@ -26,14 +26,14 @@ export class SearchModal extends SuggestModal<Chunk> {
         return queryNoteChunks(queryDetails);
     }
 
-    renderSuggestion(chunk: Chunk, el: HTMLElement) {
-        el.createEl('h4', { text: chunk.file_name, cls: 'suggestion-file-name' });
-        el.createEl('h6', { text: chunk.file_path, cls: 'suggestion-file-path' });
-        el.createEl('div', { text: chunk.text_chunk, cls: 'suggestion-text-chunk' });
+    renderSuggestion({ file_name, file_path, text_chunk }: Chunk, el: HTMLElement) {
+        el.createEl('h4', { text: file_name, cls: 'suggestion-file-name' });
+        el.createEl('h6', { text: file_path, cls: 'suggestion-file-path' });
+        el.createEl('div', { text: text_chunk, cls: 'suggestion-text-chunk' });
     }
 
-    onChooseSuggestion(chunk: Chunk, evt: MouseEvent | KeyboardEvent) {
+    onChooseSuggestion({ file_path }: Chunk, evt: MouseEvent | KeyboardEvent) {
         console.log(evt);
-        this.app.workspace.openLinkText(chunk.file_path, '');
+        this.app.workspace.openLinkText(file_path, '');
     }
 }
