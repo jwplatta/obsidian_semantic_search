@@ -15,15 +15,21 @@ Currently there's seven commands in the plugin interface: Info, Unindexed Files,
 
 ### Embedding a Single File
 
-![Embed File](./docs/embed_file.gif)
+<p align="center">
+  <img src="./docs/embed_file.gif" width="400">
+</p>
 
 ### Embedding the Entire Vault
 
-![Embed Vault](./docs/embed_vault.gif)
+<p align="center">
+  <img src="./docs/embed_vault.gif" width="400">
+</p>
 
 ### Searching
 
-![Search](./docs/search.gif)
+<p align="center">
+  <img src="./docs/search.gif" width="400">
+</p>
 
 ## Install & Setup
 
