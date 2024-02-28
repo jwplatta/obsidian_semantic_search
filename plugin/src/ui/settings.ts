@@ -63,7 +63,6 @@ export class SemanticSearchSettingTab extends PluginSettingTab {
             .addText(text => text
                 .setPlaceholder('API Key')
                 .setValue(this.plugin.settings.apiKey)
-                .setDisabled((this.plugin.settings.embeddingModel === 'gpt-3') ? false : true)
                 .onChange(async (value) => {
                     this.plugin.settings.apiKey = value;
                     await this.plugin.saveSettings();
@@ -89,7 +88,7 @@ export class SemanticSearchSettingTab extends PluginSettingTab {
                 })
             );
 
-	    new Setting(containerEl)
+        new Setting(containerEl)
             .setName('Search Result Count')
             .setDesc('Enter the number of similar documents to return')
             .addText(text => text
