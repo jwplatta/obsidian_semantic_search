@@ -13,6 +13,8 @@ Currently there's seven commands in the plugin interface: Info, Unindexed Files,
 - **Embed Vault** adds all the markdown files in the vault to the vector datastore.
 - **Update Index** updates embedding index for vector datastore.
 
+Before your first search, use the **Embed Vault** command to add all the files in the vault to the vector datastore. Then use the **Update Index** command to update the embedding index for the vector datastore.
+
 ### Embedding a Single File
 
 <p align="center">
