@@ -9,6 +9,12 @@ async function get(url: URL) {
     });
 }
 
+/**
+ * Retrieves the embeddings count from the server.
+ *
+ * @param dbDetails - The details of the database.
+ * @returns A Promise that resolves to the embedding information.
+ */
 export async function embeddingsInfo(dbDetails: DbDetails) {
     try {
         const response = await fetch(new URL('http://localhost:3003/info'), {
@@ -29,6 +35,12 @@ interface EmbeddedFile {
     file_name: string;
 }
 
+/**
+ * Retrieves the names of embedded files from the server.
+ *
+ * @param dbDetails - The details of the database.
+ * @returns A Promise that resolves to an array of file names.
+ */
 export async function embeddedFiles(dbDetails: DbDetails) {
     try {
         const response = await fetch(new URL('http://localhost:3003/embedded_files'), {
@@ -46,23 +58,28 @@ export async function embeddedFiles(dbDetails: DbDetails) {
     }
 }
 
-export async function resetEmbeddingIndex({ vaultPath: vaultPath, pluginPath: pluginPath }: DbDetails) {
+/**
+ * Resets the embedding index by deleting the existing embeddings.
+ *
+ * @param vaultPath - The path of the vault.
+ * @param pluginPath - The path of the plugin.
+ * @returns A Promise that resolves to true when the reset process is complete.
+ */
+export async function resetEmbeddingIndex({ vaultPath, pluginPath }: DbDetails) {
     try {
         const response = await fetch(new URL('http://localhost:3003/reset'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(
-                {
-                    vaultPath: vaultPath,
-                    pluginPath: pluginPath
-                }
-            )
+            body: JSON.stringify({
+                vaultPath,
+                pluginPath
+            })
         });
         console.log(response);
         return true;
-    } catch(error) {
+    } catch (error) {
         console.error('Error resetting embedding index:', error);
     }
 }
@@ -88,6 +105,13 @@ export async function embedFile(file: FileDetails, embeddingParams: EmbeddingPar
     }
 }
 
+/**
+ * Embeds a batch of files by deleting existing embeddings and creating new embeddings.
+ *
+ * @param files - An array of file details to be embedded.
+ * @param embeddingParams - The embedding parameters.
+ * @returns A Promise that resolves when the embedding process is complete.
+ */
 export async function embedBatch(files: FileDetails[], embeddingParams: EmbeddingParams) {
     return await fetch(new URL('http://localhost:3003/embed_batch'), {
         method: 'POST',
@@ -101,6 +125,13 @@ export async function embedBatch(files: FileDetails[], embeddingParams: Embeddin
     });
 }
 
+
+/**
+ * Updates the embedding index.
+ *
+ * @param dbDetails - The details of the database to be updated.
+ * @returns A Promise that resolves when the update process is complete.
+ */
 export async function updateEmbeddingIndex(dbDetails: DbDetails) {
     try {
         return await fetch(new URL('http://localhost:3003/update_index'), {
@@ -117,6 +148,7 @@ export async function updateEmbeddingIndex(dbDetails: DbDetails) {
 
 /**
  * Checks if the server is available.
+ *
  * @returns A Promise that resolves to a boolean indicating whether the server is available.
  */
 export async function serverAvailable(): Promise<boolean> {
