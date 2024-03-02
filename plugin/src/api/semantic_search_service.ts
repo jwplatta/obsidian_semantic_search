@@ -1,14 +1,5 @@
 import { Chunk, DbDetails, FileDetails, QueryDetails, EmbeddingParams } from 'src/interfaces';
 
-async function get(url: URL) {
-    return await fetch(url, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    });
-}
-
 /**
  * Retrieves the embeddings count from the server.
  *
@@ -152,16 +143,20 @@ export async function updateEmbeddingIndex(dbDetails: DbDetails) {
  * @returns A Promise that resolves to a boolean indicating whether the server is available.
  */
 export async function serverAvailable(): Promise<boolean> {
-    return await get(new URL('http://localhost:3003/check_status'))
-        .then((response) => {
-            if (!response.ok) {
-                return false;
-            }
-            return true;
-        }).catch(error => {
-            console.error('Error checking server status: ', error);
+    return await fetch(new URL('http://localhost:3003/check_status'), {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    }).then((response) => {
+        if (!response.ok) {
             return false;
-        });
+        }
+        return true;
+    }).catch(error => {
+        console.error('Error checking server status: ', error);
+        return false;
+    });
 }
 
 /**
