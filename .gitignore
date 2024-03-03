@@ -36,3 +36,4 @@ NOTES.md
 
 create_embeddings.js
 semantic_search.db
+run_dev_env.sh
