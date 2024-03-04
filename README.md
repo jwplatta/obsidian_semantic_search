@@ -2,6 +2,18 @@
 
 Simple interface for semantic search over markdown files in an Obsidian vault. The project is experimental and a work in progress. A longer description of the implementation can be found [here](https://jwplatta.github.io/posts/semantic-search-for-obsidian/).
 
+## Install & Start Server
+
+The plugin is not available in the community plugins. To install the plugin, clone the repository and run the `install.py` script to install the plugin in Obsidian. This will ask you for the full path to your Obsidian vault.
+
+The current design requires a server to be running to handle the search requests. The server is a simple node app that implements an express server. You can run the server in the background using `npm run prod` and stop it with `npm run stop-prod`. The server is available on port 3003.
+
+```bash
+$ cd obsidian-semantic-search/server
+$ npm install
+$ npm run prod
+```
+
 ## Usage
 
 Currently there's seven commands in the plugin interface: Info, Unindexed Files, Seach, Embed File, Reset Index, Embed Vault, Update Index:
@@ -32,14 +44,3 @@ Before your first search, use the **Embed Vault** command to add all the files i
 <p align="center">
   <img src="./docs/search.gif" width="400">
 </p>
-
-## Server
-
-The current design requires a server to be running to handle the search requests. The server is a simple node app that implements an express server. You can configure the server to run on a specific port.
-
-Clone the repository, install the dependencies, and then run the prod script to start the server in the background:
-```bash
-$ cd obsidian-semantic-search
-$ npm install
-$ npm run prod
-```
