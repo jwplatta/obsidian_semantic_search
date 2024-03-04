@@ -16,6 +16,7 @@ import {
     resetEmbeddingIndex
 } from 'src/api/semantic_search_service';
 
+const PLUGIN_PATH = '/.obsidian/plugins/semantic_search';
 
 export default class SemanticSearchPlugin extends Plugin {
     embedStatusBar: HTMLElement;
@@ -31,11 +32,19 @@ export default class SemanticSearchPlugin extends Plugin {
                     'The backend server is not running. Please start the server and reload the plugin.'
                 ).open();
             } else {
-                const dbDetails = {
-                    vaultPath: this.getBasePath(),
-                    pluginPath: this.getBasePath() + '/.obsidian/plugins/semantic_search'
-                };
-                await configureVectorStore(dbDetails);
+                if (this.settings.embeddingModel) {
+                    const vectorStore = {
+                        model: this.settings.embeddingModel || 'none',
+                        vaultPath: this.getBasePath(),
+                        pluginPath: this.getBasePath() + PLUGIN_PATH
+                    };
+                    await configureVectorStore(vectorStore);
+                } else {
+                    new MessageModal(
+                        this.app,
+                        'The embedding model is not set. Please configure the model in the plugin settings.'
+                    ).open();
+                }
             }
         });
 
@@ -47,12 +56,13 @@ export default class SemanticSearchPlugin extends Plugin {
             id: 'embeddings-info',
             name: 'Info',
             callback: async () => {
-                const dbDetails = {
+                const vectoreStore = {
+                    model: this.settings.embeddingModel || 'none',
                     vaultPath: this.getBasePath(),
-                    pluginPath: this.getBasePath() + '/.obsidian/plugins/semantic_search'
+                    pluginPath: this.getBasePath() + PLUGIN_PATH
                 };
 
-                const info = await embeddingsInfo(dbDetails);
+                const info = await embeddingsInfo(vectoreStore);
                 new InfoModal(
                     this.app,
                     {
@@ -67,12 +77,13 @@ export default class SemanticSearchPlugin extends Plugin {
             id: 'reset-embedding-index',
             name: 'Reset Index',
             callback: async () => {
-                const dbDetails = {
+                const vectoreStore = {
+                    model: this.settings.embeddingModel || 'none',
                     vaultPath: this.getBasePath(),
-                    pluginPath: this.getBasePath() + '/.obsidian/plugins/semantic_search'
+                    pluginPath: this.getBasePath() + PLUGIN_PATH
                 };
 
-                await resetEmbeddingIndex(dbDetails);
+                await resetEmbeddingIndex(vectoreStore);
 
                 new Notice('VSS Index reset.');
             }
@@ -90,12 +101,13 @@ export default class SemanticSearchPlugin extends Plugin {
             id: 'unindexed-files',
             name: 'Unindexed Files',
             callback: async () => {
-                const dbDetails = {
+                const vectoreStore = {
+                    model: this.settings.embeddingModel || 'none',
                     vaultPath: this.getBasePath(),
-                    pluginPath: this.getBasePath() + '/.obsidian/plugins/semantic_search'
+                    pluginPath: this.getBasePath() + PLUGIN_PATH
                 };
 
-                const fileNames = await embeddedFiles(dbDetails);
+                const fileNames = await embeddedFiles(vectoreStore);
                 const markdownFiles: TFile[] = this.app.vault.getMarkdownFiles();
                 const filteredMarkdownFiles = markdownFiles.filter(file => !fileNames.includes(file.name));
                 const filteredFileNames = filteredMarkdownFiles.map(file => file.name);
@@ -119,9 +131,9 @@ export default class SemanticSearchPlugin extends Plugin {
                             filePath: currentFile.path,
                         };
                         const embeddingParams = {
-                            model: this.settings.embeddingModel,
+                            model: this.settings.embeddingModel || 'none',
                             vaultPath: this.getBasePath(),
-                            pluginPath: this.getBasePath() + '/.obsidian/plugins/semantic_search',
+                            pluginPath: this.getBasePath() + PLUGIN_PATH,
                             chunkSize: this.settings.chunkSize
                         };
 
@@ -138,14 +150,16 @@ export default class SemanticSearchPlugin extends Plugin {
             id: 'update-embedding-index',
             name: 'Update Index',
             callback: async () => {
-                const dbDetails = {
+                const vectoreStore = {
+                    model: this.settings.embeddingModel || 'none',
                     vaultPath: this.getBasePath(),
-                    pluginPath: this.getBasePath() + '/.obsidian/plugins/semantic_search'
+                    pluginPath: this.getBasePath() + PLUGIN_PATH
                 };
                 try {
-                    updateEmbeddingIndex(dbDetails);
+                    await updateEmbeddingIndex(vectoreStore);
+                    new Notice('VSS Index updated.');
                 } catch (error) {
-                    console.error('Error updating embedding index:', error, dbDetails);
+                    console.error('Error updating embedding index:', error, vectoreStore);
                 }
             }
         });
@@ -158,16 +172,16 @@ export default class SemanticSearchPlugin extends Plugin {
                 const fileCount = markdownFiles.length;
                 console.log('Embedding ', fileCount, ' files.');
                 const embeddingParams = {
-                    model: this.settings.embeddingModel,
+                    model: this.settings.embeddingModel || 'none',
                     vaultPath: this.getBasePath(),
-                    pluginPath: this.getBasePath() + '/.obsidian/plugins/semantic_search',
+                    pluginPath: this.getBasePath() + PLUGIN_PATH,
                     chunkSize: this.settings.chunkSize
                 };
 
                 let embeddedCount = 0;
                 this.embedStatusBar.setText(`Embedded file ${embeddedCount} of ${fileCount}`);
                 const batches = [];
-                const batchSize = 20; // TODO: Make this a setting
+                const batchSize = 10; // TODO: Make this a setting
                 for (let i = 0; i < markdownFiles.length; i += batchSize) {
                     const files = markdownFiles.slice(i, i + batchSize);
                     const batch = files.map((file) => {
