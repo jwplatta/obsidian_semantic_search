@@ -22,9 +22,9 @@ app.post('/info', (req, res) => {
   })
 })
 
-app.post('/configure_db', (req, res) => {
+app.post('/configure', (req, res) => {
   try {
-    new VectorStore(buildDbPath(req.body)).configure()
+    new VectorStore(buildDbPath(req.body)).configure(req.body.model)
     res.sendStatus(200)
   } catch (error) {
     console.error(error)
@@ -109,14 +109,6 @@ app.post('/query', async (req, res) => {
   }
 
   const vectDb = new VectorStore(buildDbPath(req.body))
-
-  try {
-    console.log(vectDb.size())
-  } catch (error) {
-    console.error(error)
-    res.sendStatus(500)
-  }
-
   try {
     const searchResults = await vectDb.query(
       req.body.query,
