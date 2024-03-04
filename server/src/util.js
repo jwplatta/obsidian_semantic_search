@@ -13,6 +13,6 @@ export async function checkFileExists (filePath) {
 export function buildDbPath (reqBody) {
   return path.join(
     reqBody.pluginPath,
-    'semantic_search.db'
+    'semantic_search.db' // TODO: make constant or move to settings in plugin
   )
 }
