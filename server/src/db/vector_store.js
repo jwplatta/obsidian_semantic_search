@@ -80,7 +80,6 @@ export class VectorStore {
   deleteFilesEmbedding (fileNames) {
     const deleteFilesFromNoteChunksSQL = deleteFilesFromNoteChunks(fileNames)
     this.db.prepare(deleteFilesFromNoteChunksSQL).run(...fileNames)
-    console.log('deleteFilesEmbedding: ', this.chunkCount())
   }
 
   async embedBatch (chunkSize, chunkOverlap, model, files, vaultPath) {
@@ -188,8 +187,9 @@ export class VectorStore {
     }
   }
 
-  configure () {
+  async configure (model) {
     try {
+      await pipeline('feature-extraction', model)
       this.db.prepare(createEmbeddingsTable).run()
       this.db.prepare(createVirtualTable).run()
     } catch (error) {
