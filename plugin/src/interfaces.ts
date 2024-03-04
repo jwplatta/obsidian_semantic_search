@@ -4,7 +4,8 @@ export interface Chunk {
   text_chunk: string;
 }
 
-export interface DbDetails {
+export interface VectorStore {
+  model: string;
   vaultPath: string;
   pluginPath: string;
 }

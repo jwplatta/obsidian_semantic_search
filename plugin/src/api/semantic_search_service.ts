@@ -1,24 +1,24 @@
-import { Chunk, DbDetails, FileDetails, QueryDetails, EmbeddingParams } from 'src/interfaces';
+import { Chunk, VectorStore, FileDetails, QueryDetails, EmbeddingParams } from 'src/interfaces';
 
 /**
  * Retrieves the embeddings count from the server.
  *
- * @param dbDetails - The details of the database.
+ * @param vectorStore - The details of the database.
  * @returns A Promise that resolves to the embedding information.
  */
-export async function embeddingsInfo(dbDetails: DbDetails) {
+export async function embeddingsInfo(vectorStore: VectorStore) {
     try {
         const response = await fetch(new URL('http://localhost:3003/info'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(dbDetails)
+            body: JSON.stringify(vectorStore)
         });
         const info = await response.json();
         return info;
     } catch (error) {
-        console.error('Error getting embedding info: ', error, dbDetails);
+        console.error('Error getting embedding info: ', error, vectorStore);
     }
 }
 
@@ -29,23 +29,23 @@ interface EmbeddedFile {
 /**
  * Retrieves the names of embedded files from the server.
  *
- * @param dbDetails - The details of the database.
+ * @param vectorStore - The details of the database.
  * @returns A Promise that resolves to an array of file names.
  */
-export async function embeddedFiles(dbDetails: DbDetails) {
+export async function embeddedFiles(vectorStore: VectorStore) {
     try {
         const response = await fetch(new URL('http://localhost:3003/embedded_files'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(dbDetails)
+            body: JSON.stringify(vectorStore)
         });
         const responseJSON = await response.json();
         const fileNames = responseJSON.map((file: EmbeddedFile) => file.file_name);
         return fileNames;
     } catch (error) {
-        console.error('Error getting embedded files: ', error, dbDetails);
+        console.error('Error getting embedded files: ', error, vectorStore);
     }
 }
 
@@ -56,7 +56,7 @@ export async function embeddedFiles(dbDetails: DbDetails) {
  * @param pluginPath - The path of the plugin.
  * @returns A Promise that resolves to true when the reset process is complete.
  */
-export async function resetEmbeddingIndex({ vaultPath, pluginPath }: DbDetails) {
+export async function resetEmbeddingIndex({ vaultPath, pluginPath }: VectorStore) {
     try {
         const response = await fetch(new URL('http://localhost:3003/reset'), {
             method: 'POST',
@@ -120,17 +120,17 @@ export async function embedBatch(files: FileDetails[], embeddingParams: Embeddin
 /**
  * Updates the embedding index.
  *
- * @param dbDetails - The details of the database to be updated.
+ * @param vectorStore - The details of the database to be updated.
  * @returns A Promise that resolves when the update process is complete.
  */
-export async function updateEmbeddingIndex(dbDetails: DbDetails) {
+export async function updateEmbeddingIndex(vectorStore: VectorStore) {
     try {
         return await fetch(new URL('http://localhost:3003/update_index'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(dbDetails)
+            body: JSON.stringify(vectorStore)
         });
     } catch (error) {
         console.error('Error updating embedding index:', error);
@@ -162,17 +162,17 @@ export async function serverAvailable(): Promise<boolean> {
 /**
  * Configures the vector store with the provided database details.
  *
- * @param dbDetails - The details of the database to be configured.
+ * @param vectorStore - The details of the database to be configured.
  * @returns A promise that resolves to true if the configuration is
  * successful, or false if there is an error.
  */
-export async function configureVectorStore(dbDetails: DbDetails) {
-    return await fetch(new URL('http://localhost:3003/configure_db'), {
+export async function configureVectorStore(vectorStore: VectorStore) {
+    return await fetch(new URL('http://localhost:3003/configure'), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(dbDetails)
+        body: JSON.stringify(vectorStore)
     }).then(response => {
         if (!response.ok) {
             return false;
