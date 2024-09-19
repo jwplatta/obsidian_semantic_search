@@ -1,8 +1,8 @@
 import express from 'express'
 import cors from 'cors'
 import { VectorStore } from './src/db/vector_store.js'
-import { buildDbPath } from './src/util.js'
 
+const DB_PATH = 'obsidian_semantic_search.db'
 const app = express()
 app.use(express.json())
 app.use(cors())
@@ -11,7 +11,9 @@ const PORT = process.env.PORT || 3003
 app.get('/check_status', (req, res) => { res.sendStatus(200) })
 
 app.post('/info', (req, res) => {
-  const vectDb = new VectorStore(buildDbPath(req.body))
+  console.log('/info\n', req.body)
+
+  const vectDb = new VectorStore(DB_PATH)
 
   vectDb.info((err, result) => {
     if (err) {
@@ -23,8 +25,10 @@ app.post('/info', (req, res) => {
 })
 
 app.post('/configure', (req, res) => {
+  console.log('/configure\n', req.body)
+
   try {
-    new VectorStore(buildDbPath(req.body)).configure(req.body.model)
+    new VectorStore(DB_PATH).configure(req.body.model)
     res.sendStatus(200)
   } catch (error) {
     console.error(error)
@@ -33,9 +37,10 @@ app.post('/configure', (req, res) => {
 })
 
 app.post('/embed_file', async (req, res) => {
-  const vectDb = new VectorStore(buildDbPath(req.body))
+  console.log('/embed_file\n', req.body)
 
   try {
+    const vectDb = new VectorStore(DB_PATH)
     vectDb.embedFile(
       req.body.chunkSize,
       50,
@@ -53,7 +58,8 @@ app.post('/embed_file', async (req, res) => {
 })
 
 app.post('/embed_batch', async (req, res) => {
-  const vectDb = new VectorStore(buildDbPath(req.body))
+  console.log('/embed_batch\n', req.body)
+  const vectDb = new VectorStore(DB_PATH)
   try {
     await vectDb.embedBatch(
       req.body.chunkSize,
@@ -71,8 +77,9 @@ app.post('/embed_batch', async (req, res) => {
 })
 
 app.post('/embedded_files', async (req, res) => {
+  console.log('/embedded_files\n', req.body)
   try {
-    const fileNames = new VectorStore(buildDbPath(req.body)).fileNames()
+    const fileNames = new VectorStore(DB_PATH).fileNames()
     console.log('fileNames: ', fileNames)
     res.status(200).json(fileNames)
   } catch (error) {
@@ -82,8 +89,9 @@ app.post('/embedded_files', async (req, res) => {
 })
 
 app.post('/reset', async (req, res) => {
+  console.log('/reset\n', req.body)
   try {
-    new VectorStore(buildDbPath(req.body)).reset()
+    new VectorStore(DB_PATH).reset()
     res.sendStatus(200)
   } catch (error) {
     console.error(error)
@@ -92,9 +100,10 @@ app.post('/reset', async (req, res) => {
 })
 
 app.post('/update_index', (req, res) => {
-  console.log(req.body)
+  console.log('/update_index\n', req.body)
+
   try {
-    new VectorStore(buildDbPath(req.body)).updateIndex()
+    new VectorStore(DB_PATH).updateIndex()
     res.sendStatus(200)
   } catch (error) {
     console.error(error)
@@ -103,12 +112,14 @@ app.post('/update_index', (req, res) => {
 })
 
 app.post('/query', async (req, res) => {
+  console.log('/query\n', req.body)
+
   if (!req.body.query || req.body.query.trim() === '') {
     res.status(200).json([])
     return
   }
 
-  const vectDb = new VectorStore(buildDbPath(req.body))
+  const vectDb = new VectorStore(DB_PATH)
   try {
     const searchResults = await vectDb.query(
       req.body.query,
