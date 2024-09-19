@@ -30,6 +30,7 @@ jobs:
       #     docker build -t semantic-search-server .
 
       # - name: Save Docker image as archive
+      #   working-directory: ./server
       #   run: |
       #     docker save semantic-search-server | gzip > semantic-search-server.tar.gz
 
@@ -37,13 +38,13 @@ jobs:
         run: |
           ls -la
 
-      # - name: Prepare plugin files for release
-      #   run: |
-      #     mkdir release
-      #     cp ./plugin/main.js ./release/
-      #     cp ./plugin/manifest.json ./release/
-      #     cp ./plugin/style.css ./release/
-      #     mv semantic-search-server.tar.gz ./release/
+      - name: Prepare plugin files for release
+        run: |
+          mkdir release
+          cp ./plugin/main.js ./release/
+          cp ./plugin/manifest.json ./release/
+          cp ./plugin/style.css ./release/
+      #     mv ./server/semantic-search-server.tar.gz ./release/
 
       # - name: Create GitHub Release
       #   id: create_release
