@@ -34,10 +34,6 @@ jobs:
         run: |
           docker save semantic-search-server | gzip > semantic-search-server.tar.gz
 
-      - name: List files
-        run: |
-          ls -la
-
       - name: Prepare plugin files for release
         run: |
           mkdir release
@@ -54,8 +50,8 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
+          draft: true
+          prerelease: true
 
       - name: Upload release assets
         uses: actions/upload-release-asset@v1
