@@ -15,6 +15,7 @@ import {
     embeddedFiles,
     resetEmbeddingIndex
 } from 'src/api/semantic_search_service';
+import { debounce } from 'lodash';
 
 const PLUGIN_PATH = '/.obsidian/plugins/semantic_search';
 
@@ -29,7 +30,7 @@ export default class SemanticSearchPlugin extends Plugin {
             if (!available) {
                 new MessageModal(
                     this.app,
-                    'The backend server is not running. Please start the server and reload the plugin.'
+                    'The SemanticSearch server is not running. Please start the server and reload the plugin.'
                 ).open();
             } else {
                 if (this.settings.embeddingModel) {
@@ -48,8 +49,35 @@ export default class SemanticSearchPlugin extends Plugin {
             }
         });
 
-        this.embedStatusBar = this.addStatusBarItem();
+        const debouncedOnModify = debounce((file) => {
+            console.log(`Upadting embeddings for ${file.path}.`);
 
+            if (file && file.extension === 'md') {
+                try {
+                    const fileDetails = {
+                        fileName: file.name,
+                        filePath: file.path,
+                    };
+                    const embeddingParams = {
+                        model: this.settings.embeddingModel || 'none',
+                        vaultPath: this.getBasePath(),
+                        pluginPath: this.getBasePath() + PLUGIN_PATH,
+                        chunkSize: this.settings.chunkSize
+                    };
+
+                    embedFile(fileDetails, embeddingParams);
+                } catch (error) {
+                    console.error('Error embedding file:', error);
+                }
+            }
+
+        }, 1000);
+
+        this.registerEvent(this.app.vault.on('modify', (file) => {
+            debouncedOnModify(file);
+        }));
+
+        this.embedStatusBar = this.addStatusBarItem();
         this.addSettingTab(new SemanticSearchSettingTab(this.app, this as SemanticSearchPlugin));
 
         this.addCommand({
