@@ -42,7 +42,7 @@ jobs:
           cp ./plugin/styles.css ./release/
           mv ./server/semantic-search-server.tar.gz ./release/
 
-      - name: Create GitHub Release
+      - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -50,8 +50,8 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
-          draft: true
-          prerelease: true
+          draft: false
+          prerelease: false
 
       - name: Upload release assets
         uses: actions/upload-release-asset@v1
