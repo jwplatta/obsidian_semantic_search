@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js",
-    "prod": "forever start prod.json",
+    "prod": "node index.js",
     "stop-prod": "forever stop semantic_search_server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
