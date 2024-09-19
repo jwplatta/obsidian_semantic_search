@@ -34,3 +34,5 @@ data.json
 semantic_search.db
 
 /examples
+
+/dist
